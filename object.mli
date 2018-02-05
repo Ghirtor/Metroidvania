@@ -1,0 +1,23 @@
+type movable;;
+type fixed;;
+type t;;
+
+val move : movable -> float -> movable;;
+val applyGravity : movable -> movable;;
+val change_direction : movable -> movable;;
+val jump : movable -> movable;;
+val collide : t -> t -> float;;
+val get_damage : movable -> int -> movable;;
+val health : movable -> int -> movable;;
+val compare : t -> t -> bool;;
+val create_movable : int -> int -> int -> int -> int -> int -> int -> int -> int -> movable;;
+val create_fixed : int -> int -> int -> int -> fixed;;
+val get_id : t -> int;;
+val get_positionX : t -> int;;
+val get_positionY : t -> int;;
+val get_speedX : t -> int;;
+val get_speedY : t -> int;;
+val get_width : t -> int;;
+val get_height : t -> int;;
+val get_mass : movable -> int;;
+val get_life : movable -> int;;
