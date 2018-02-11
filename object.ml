@@ -27,9 +27,26 @@ type collision = {
   time : float
 };;
 
+type hitbox_rect = {
+  id : int;
+  x : int;
+  y : int;
+  vx : int;
+  vy : int;
+  w : int;
+  h : int
+};;
+
 type t = Movable of movable | Fixed of fixed;;
 
 let null_collision = {idA = -1; idB = -1; time = 9999.0};;
+
+(* get the hitbox corresponding to the t object *)
+
+let get_hitbox t =
+  match t with
+    Movable(x) -> {id = x.id; x = x.positionX; y = x.positionY; vx = x.speedX; vy = x.speedY; w = x.width; h = x.height}
+  |Fixed(x) -> {id = x.id; x = x.positionX; y = x.positionY; vx = x.speedX; vy = x.speedY; w = x.width; h = x.height};;
 
 (* functions for types t, movable and fixed  *)
 
@@ -47,28 +64,13 @@ let change_direction m = let t = m.mass in {id = m.id; positionX = (-1 * m.posit
 
 let jump m = m;;
 
-let collide t1 t2 =
-  (*let x1 = t1.positionX in
-  let y1 = t1.positionY in
-  let x2 = t2.positionX in
-  let y2 = t2.positionY in
-  let vx1 = t1.speedX in
-  let vy1 = t1.speedY in
-  let vx2 = t2.speedX in
-  let vy2 = t2.speedY in
-  let w1 = t1.width in
-  let w2 = t2.width in
-  let h1 = t1.height in
-  let h2 = t2.height in
-  let dx = Pervasives.abs (x1 + vx1 - x2 + vx2) in
-  let dy = Pervasives.abs (y1 + vy1 - y2 + vy2) in
-  if dx <= (w1 / 2 + w2 / 2) && dy <= (h1 / 2 + h2 / 2) then*) 0.0;;
+let get_collision h1 h2 = null_collision;;
+
+let collide t1 t2 = get_collision (get_hitbox t1) (get_hitbox t2);;
 
 let get_damage m d = {m with life = (Pervasives.max (m.life - d) 0)};;
 
 let health m h = {m with life = (Pervasives.min (m.life + h) m.max_life)};;
-
-let compare t1 t2 = t1 == t2;;
 
 let create_movable x y vx vy w h m l ml = {id = next_id (); positionX = x; positionY = y; speedX = vx; speedY = vy; width = w; height = h; mass = m; life = l; max_life = ml};;
 
@@ -84,6 +86,8 @@ let get_id t =
   match t with
     Movable(x) -> x.id
   |Fixed(x) -> x.id;;
+
+let compare t1 t2 = (get_id t1) = (get_id t2);;
 
 let get_positionX t =
   match t with
