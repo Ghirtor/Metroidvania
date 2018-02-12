@@ -1,6 +1,4 @@
-open Tsdl;;
 
-let players = create_movables;;
 
 let id_players = ref 0;;
 let id_enemies = ref 0;;
@@ -20,26 +18,43 @@ let create_movables n =
   Array.make n (Object.create_null_movable ())
 ;;
 
+let players = create_movables 1;;
+
 let create_fixed n =
   Array.make n (Object.create_null_fixed ())
 ;;
 
-let add e a id =
-  match e with
-  | Movable (m) -> a.(!id) <- e; id := (id+1)
-  | Fixed (f) -> a.(!id) <- e; id := (id+1)
+let enemies = create_movables 10;;
+let elements = create_fixed 15;;
+
+let add_movable e a id =
+  a.(!id) <- e;
+  id := (!id+1)
 ;;
 
-exception not_found;;
+let add_fixed e a id =
+  a.(!id) <- e;
+  id := (!id+1)
+;;
+
+exception Not_found;;
 
 let search e a =
   for i=0 to (Array.length a)-1 do
     if (e.compare a.(i)) = 0 then i
   done;
-  raise not_found
+  raise Not_found
 ;;
 
-let remove e a id =
+let remove_movable e a id =
+  let tmp = search e a in
+  for i=tmp to (!id)-2 do
+    a.(i) <- a.(i+1)
+  done;
+  id := (!id) - 1
+;;
+
+let remove_fixed e a id =
   let tmp = search e a in
   for i=tmp to (!id)-2 do
     a.(i) <- a.(i+1)
