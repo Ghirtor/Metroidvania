@@ -24,7 +24,9 @@ type fixed = {
 type collision = {
   idA : int;
   idB : int;
-  time : float
+  time : float;
+  damagesA : int;
+  damagesB : int
 };;
 
 type hitbox_rect = {
@@ -34,19 +36,20 @@ type hitbox_rect = {
   vx : int;
   vy : int;
   w : int;
-  h : int
+  h : int;
+  damages : int
 };;
 
 type t = Movable of movable | Fixed of fixed;;
 
-let null_collision = {idA = -1; idB = -1; time = 9999.0};;
+let null_collision = {idA = -1; idB = -1; time = 9999.0; damagesA = -1; damagesB = -1};;
 
 (* get the hitbox corresponding to the t object *)
 
 let get_hitbox t =
   match t with
-    Movable(x) -> {id = x.id; x = x.positionX; y = x.positionY; vx = x.speedX; vy = x.speedY; w = x.width; h = x.height}
-  |Fixed(x) -> {id = x.id; x = x.positionX; y = x.positionY; vx = x.speedX; vy = x.speedY; w = x.width; h = x.height};;
+    Movable(x) -> {id = x.id; x = x.positionX; y = x.positionY; vx = x.speedX; vy = x.speedY; w = x.width; h = x.height; damages = 0}
+  |Fixed(x) -> {id = x.id; x = x.positionX; y = x.positionY; vx = x.speedX; vy = x.speedY; w = x.width; h = x.height; damages = 0};;
 
 (* functions for types t, movable and fixed  *)
 
@@ -130,3 +133,7 @@ let get_first_id c = c.idA;;
 let get_second_id c = c.idB;;
 
 let get_time c = c.time;;
+
+let get_damagesA c = c.damagesA;;
+
+let get_damagesB c = c.damagesB;;
