@@ -39,37 +39,48 @@ let add_fixed e a id =
 
 exception Not_found;;
 
-let search e a =
-  for i=0 to (Array.length a)-1 do
-    if (e.compare a.(i)) = 0 then i
+let search_movable e a =
+  for i=0 to (!id)-1 do
+    if (Object.compare_movable e a.(i)) = 0 then i
+  done;
+  raise Not_found
+;;
+
+let search_fixed e a =
+  for i=0 to (!id)-1 do
+    if (Object.compare_fixed e a.(i)) = 0 then i
   done;
   raise Not_found
 ;;
 
 let remove_movable e a id =
-  let tmp = search e a in
-  for i=tmp to (!id)-2 do
-    a.(i) <- a.(i+1)
-  done;
-  id := (!id) - 1
+  try
+    let tmp = search_movable e a in
+    for i=tmp to (!id)-2 do
+      a.(i) <- a.(i+1)
+    done;
+    id := (!id) - 1
+  with Not_found -> ()
 ;;
 
 let remove_fixed e a id =
-  let tmp = search e a in
-  for i=tmp to (!id)-2 do
-    a.(i) <- a.(i+1)
-  done;
-  id := (!id) - 1
+  try
+    let tmp = search_fixed e a in
+    for i=tmp to (!id)-2 do
+      a.(i) <- a.(i+1)
+    done;
+    id := (!id) - 1
+  with Not_found -> ()
 ;;
 
 let display x y w h =
-  for i=0 to (Array.length elements)-1 do
+  for i=0 to (!id_elements)-1 do
     Object.display elements.(i) x y w h
   done;
-  for i=0 to (Array.length enemies)-1 do
+  for i=0 to (!id_enemies)-1 do
     Object.display enemies.(i) x y w h
   done;
-  for i=0 to (Array.length players)-1 do
+  for i=0 to (!id_players)-1 do
     Object.display players.(i) x y w h
   done;
 ;;
