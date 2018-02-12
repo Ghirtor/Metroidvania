@@ -21,7 +21,10 @@ type fixed = {
   height : int
 };;
 
+type collision_type = Null | Horizontal | Vertical;;
+
 type collision = {
+  col_type : collision_type;
   idA : int;
   idB : int;
   time : float;
@@ -42,7 +45,7 @@ type hitbox_rect = {
 
 type t = Movable of movable | Fixed of fixed;;
 
-let null_collision = {idA = -1; idB = -1; time = 9999.0; damagesA = -1; damagesB = -1};;
+let null_collision = {col_type = Null; idA = -1; idB = -1; time = 9999.0; damagesA = -1; damagesB = -1};;
 
 (* get the hitbox corresponding to the t object *)
 
@@ -67,7 +70,32 @@ let change_direction m = let t = m.mass in {id = m.id; positionX = (-1 * m.posit
 
 let jump m = m;;
 
-let get_collision h1 h2 = null_collision;;
+(* we assume that point (x=0, y=0 is at top left corner *)
+(* checks if there is a collision between 2 hitboxes *)
+let get_collision h1 h2 =
+  let top = if h2.y > h1.y then h1 else h2 in
+  let bottom = if top == h1 then h2 else h1 in
+  let left = if h1.x < h2.x then h1 else h2 in
+  let right = if left == h1 then h2 else h1 in
+  (* checks if hitboxes are already in collision *)
+  let c1 = right.x <= left.x + left.w in
+  let c2 = top.y + top.h >= bottom.y in
+  if c1 && c2 then null_collision else
+    begin
+      (* checks if hitboxes are getting away *)
+      let c3 = right.vx >= 0 && left.vx <= 0 in
+      let c4 = top.vy <= 0 && bottom.vy >= 0 in
+      if c3 && c4 then null_collision else
+	begin
+	  let time_before_collision_x = (float_of_int (Pervasives.abs (right.x - (left.x + left.w)))) /. (float_of_int (Pervasives.abs (left.vx + right.vx))) in
+	  let time_before_collision_y = (float_of_int (Pervasives.abs (bottom.y - (top.y + top.h)))) /. (float_of_int (Pervasives.abs (bottom.vy + top.vy))) in
+	  let time_before_collision = Pervasives.max time_before_collision_x time_before_collision_y in
+	  let entityA = if time_before_collision_x > time_before_collision_y then left else top in
+	  let entityB = if time_before_collision_x > time_before_collision_y then right else bottom in
+	  (* A is the entity at left if collision is of type Horizontal and at top in the other case. B is the other one  *)
+	  {col_type = if time_before_collision < 0.0 then Null else if time_before_collision_x > time_before_collision_y then Horizontal else Vertical; idA = entityA.id; idB = entityB.id; time = time_before_collision; damagesA = entityA.damages; damagesB = entityB.damages};
+	end;
+    end;;
 
 let collide t1 t2 = get_collision (get_hitbox t1) (get_hitbox t2);;
 
@@ -91,6 +119,10 @@ let get_id t =
   |Fixed(x) -> x.id;;
 
 let compare t1 t2 = (get_id t1) = (get_id t2);;
+
+let compare_movable m1 m2 = m1 == m2;;
+
+let compare_fixed f1 f2 = f1 == f2;;
 
 let get_positionX t =
   match t with
@@ -137,3 +169,5 @@ let get_time c = c.time;;
 let get_damagesA c = c.damagesA;;
 
 let get_damagesB c = c.damagesB;;
+
+let get_collision_type c = c.col_type;;
