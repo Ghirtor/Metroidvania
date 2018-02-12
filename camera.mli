@@ -11,3 +11,4 @@ val modify_camera : t -> int -> int -> t;;
 (* camera -> x -> y -> new camera *)
 val modify_size : t -> int -> int -> t;;
 (* camera -> height -> width -> new camera *)
+val move_camera : t -> int -> int -> int -> int -> int -> int -> t;;
