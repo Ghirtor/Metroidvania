@@ -11,8 +11,8 @@ val height : int;;
 val players : Object.movable array;;
 val enemies : Object.movable array;;
 val elements : Object.fixed array;;
-val create_movables : unit -> Object.movable array;;
-val create_fixed : unit -> Object.fixed array;;
+val create_movables : int -> Object.movable array;;
+val create_fixed : int -> Object.fixed array;;
 val width : unit -> int;;
 val height : unit -> int;;
 val display : int -> int-> int -> int -> unit;; (* x -> y -> w -> h, x , y, w et h de la caméra *)

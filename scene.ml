@@ -1,5 +1,3 @@
-
-
 let id_players = ref 0;;
 let id_enemies = ref 0;;
 let id_elements = ref 0;;
@@ -38,42 +36,51 @@ let add_fixed e a id =
 ;;
 
 exception Not_found;;
+exception Found of int;;
 
-let search_movable e a =
+let search_movable e a id =
   for i=0 to (!id)-1 do
-    if (Object.compare_movable e a.(i)) = 0 then i
+    if (Object.compare_movable e a.(i)) then raise (Found(i))
   done;
-  raise Not_found
 ;;
 
-let search_fixed e a =
+let search_fixed e a id =
   for i=0 to (!id)-1 do
-    if (Object.compare_fixed e a.(i)) = 0 then i
+    if (Object.compare_fixed e a.(i)) then raise (Found(i))
   done;
-  raise Not_found
 ;;
 
-let remove_movable e a id =
+(*let remove_movable e a id =
   try
-    let tmp = search_movable e a in
+    let tmp = search_movable e a id in
     for i=tmp to (!id)-2 do
       a.(i) <- a.(i+1)
     done;
     id := (!id) - 1
   with Not_found -> ()
+;;*)
+
+let remove_movable e a id =
+  try
+    search_movable e a id
+  with Found(tmp) ->
+    for i=tmp to (!id)-2 do
+      a.(i) <- a.(i+1)
+    done;
+    id := (!id) - 1
 ;;
 
 let remove_fixed e a id =
   try
-    let tmp = search_fixed e a in
+    search_fixed e a id
+  with Found(tmp) ->
     for i=tmp to (!id)-2 do
       a.(i) <- a.(i+1)
     done;
     id := (!id) - 1
-  with Not_found -> ()
 ;;
 
-let display x y w h =
+(*let display x y w h =
   for i=0 to (!id_elements)-1 do
     Object.display elements.(i) x y w h
   done;
@@ -83,6 +90,10 @@ let display x y w h =
   for i=0 to (!id_players)-1 do
     Object.display players.(i) x y w h
   done;
+  ;;*)
+
+let display x y w h =
+  ()
 ;;
 
 let play () =
