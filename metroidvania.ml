@@ -1,11 +1,17 @@
 open Tsdl;;
 
-let user_events = [Sdl.Event.quit];;
+let user_events = [Sdl.Event.quit; Sdl.Event.key_down];;
 let quit = ref false;;
 
 let event e =
   let t = (Sdl.Event.get e Sdl.Event.typ) in
-  if t = Sdl.Event.quit then quit := true;;
+  if t = Sdl.Event.quit then quit := true
+  else if t = Sdl.Event.key_down then
+    begin
+      let t' = (Sdl.Event.get e Sdl.Event.keyboard_keycode) in
+      if t' = Sdl.K.right then Printf.printf "Right\n" else if t'= Sdl.K.left then Printf.printf "Left\n"
+    end
+;;
 
 let play () =
   let events = Sdl.Event.create () in
