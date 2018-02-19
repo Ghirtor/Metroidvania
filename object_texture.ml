@@ -1,12 +1,8 @@
-type t = {path : string; width : int; height : int; texture : Tsdl.Sdl.texture};;
+type t = {path : string; texture : Tsdl.Sdl.texture};;
 
-let create s w h r = {path = s; width = w; height = h; texture = Tools.create_texture_from_surface r (Tools.load_bmp s)};;
+let create s w h r = {path = s; texture = Tools.create_texture_from_surface r (Tools.load_bmp s)};;
 
 let get_path t = t.path;;
-
-let get_width t = t.width;;
-
-let get_height t = t.height;;
 
 let get_texture t = t.texture;;
 
