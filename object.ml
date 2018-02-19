@@ -62,7 +62,7 @@ let generate_id () =
 
 let next_id = generate_id ();;
 
-let move m f = let t = m.mass in {id = m.id; positionX = int_of_float ((float_of_int m.positionX) +. (f *. (float_of_int  m.speedX))); positionY = int_of_float ((float_of_int m.positionY) +. (f *. (float_of_int  m.speedY))); speedX = m.speedX; speedY = m.speedY; width = m.width; height = m.height; mass = t; life = m.life; max_life = m.max_life};;
+let move m f w h = let t = m.mass in {id = m.id; positionX = Pervasives.max (Pervasives.min (int_of_float ((float_of_int m.positionX) +. (f *. (float_of_int  m.speedX)))) w) 0; positionY = Pervasives.max (Pervasives.min (int_of_float ((float_of_int m.positionY) +. (f *. (float_of_int  m.speedY)))) h) 0; speedX = m.speedX; speedY = m.speedY; width = m.width; height = m.height; mass = t; life = m.life; max_life = m.max_life};;
 
 let applyGravity m = m;;
 

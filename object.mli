@@ -6,7 +6,7 @@ type t;;
 
 val null_collision : collision;;
 
-val move : movable -> float -> movable;;
+val move : movable -> float -> int -> int -> movable;;
 val applyGravity : movable -> movable;;
 val change_direction : movable -> movable;;
 val jump : movable -> movable;;
