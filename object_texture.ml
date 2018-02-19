@@ -12,4 +12,4 @@ let get_texture t = t.texture;;
 
 let render t x y r gr =
   let render_quad = Tsdl.Sdl.Rect.create x y (Tsdl.Sdl.Rect.w r) (Tsdl.Sdl.Rect.h r) in
-  Tools.render_copy gr (get_texture t) r render_quad;;
+  Tools.render_copy r render_quad gr (get_texture t);;

@@ -10,4 +10,4 @@ val get_height: t -> int;;
 
 val get_texture: t -> Tsdl.Sdl.texture;;
 
-val render: t -> int -> int -> Tsdl.Sdl.rect -> Tsdl.Sdl.render -> unit;;
+val render: t -> int -> int -> Tsdl.Sdl.rect -> Tsdl.Sdl.renderer -> unit;;

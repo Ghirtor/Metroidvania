@@ -18,6 +18,7 @@ clean_testdir:
 	rm -f $(TESTS).opt
 
 clean_project:
+	rm -f *.byte
 	rm -rf _build
 	rm -f *.cm[iox] *~ .*~ #*#
 	rm -f $(PROJECT)
