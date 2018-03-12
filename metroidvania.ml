@@ -33,6 +33,27 @@ let display_fixed t c r =
   let sprite = Object.get_current_sprite t in
   Object_texture.render (Object.get_texture t) (Object.get_positionX t) (Object.get_positionY t) sprite r (Object.get_zoom t);;
 
+(* function to display the lifebar on the screen *)
+let display_lifebar bar cam renderer =
+  let color = Lifebar.get_color bar in
+  let (x,y) = Lifebar.get_xy bar in
+  let max_h = Lifebar.get_max_height bar in
+  let max_w = Lifebar.get_max_width bar in
+  let cam_h = Camera.get_h cam in
+  let cam_w = Camera.get_w cam in
+  (* the border rectangle *)
+  let border = Sdl.Rect.create (x+cam_w/20) (y+cam_h/20) max_w max_h in
+  let black = Sdl.Color.create 0 0 0 0 in
+  let life_perc = (float_of_int (Lifebar.get_life bar)) /. (float_of_int (Lifebar.get_max bar)) in
+  let new_size = int_of_float (life_perc *. float_of_int (max_w)) in
+  (* the real rectangle with the life *)
+  let new_rect = Sdl.Rect.create (x+cam_w/20) (y+cam_h/20) new_size max_h in
+  let () = Tools.set_render_draw_color renderer (Sdl.Color.r color) (Sdl.Color.g color) (Sdl.Color.b color) (Sdl.Color.a color) in
+  let () = Tools.render_fill_rect renderer new_rect in
+  let () = Tools.set_render_draw_color renderer 0 0 0 (Sdl.Color.a color) in
+  let () = Tools.render_draw_rect renderer border in
+;;
+
 (*let play () =
   let events = Sdl.Event.create () in
   while  not (!quit) do

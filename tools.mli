@@ -10,3 +10,6 @@ val load_png : string -> Tsdl.Sdl.surface;;
 val create_texture_from_surface : Tsdl.Sdl.renderer -> Tsdl.Sdl.surface -> Tsdl.Sdl.texture;;
 val query_texture : Tsdl.Sdl.texture -> (Tsdl.Sdl.Pixel.format_enum * Tsdl.Sdl.Texture.access * (int * int));;
 val render_clear : Tsdl.Sdl.renderer -> unit;;
+val render_fill_rect : Tsdl.Sdl.renderer -> Sdl.rect -> unit;;
+val render_draw_rect : Tsdl.Sdl.renderer -> Sdl.rect -> unit;;
+val set_render_draw_color : Tsdl.Sdl.renderer -> int -> int -> int -> int -> unit;;

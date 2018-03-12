@@ -5,7 +5,7 @@ let sdl_initialize () =
   match Sdl.init Sdl.Init.video with
   |Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
   |Ok () -> Printf.printf "video initialized\n";
-     let r = Image.init Image.Init.png in ();;
+            let r = Image.init Image.Init.png in ();;
 
 let create_window s w h f =
   (*match Sdl.create_window "metroidvania" 640 480 Sdl.Window.windowed with*)
@@ -62,6 +62,24 @@ let render_clear r =
   match Sdl.render_clear r with
   |Error (`Msg e) -> Sdl.log "render_clear error: %s" e; exit 1
   |Ok () -> ();;
+
+let render_fill_rect rend rect =
+  match Sdl.render_fill_rect rend (Some(rect)) with
+  | Error (`Msg e) -> Sdl.log "render_fill_rect error: %s" e; exit 1
+  | Ok() -> ()
+;;
+
+let render_draw_rect rend rect =
+  match Sdl.render_draw_rect rend (Some(rect)) with
+  | Error (`Msg e) -> Sdl.log "render_draw_rect error: %s" e; exit 1
+  | Ok() -> ()
+;;
+
+let set_render_draw_color rend r g b a =
+  match Sdl.set_render_draw_color rend r g b a with
+  | Error (`Msg e) -> Sdl.log "set_render_draw_color error: %s" e; exit 1
+  | Ok() -> ()
+;;
 
 let window = ref (create_window "metroidvania" 640 480 Sdl.Window.windowed);;
 

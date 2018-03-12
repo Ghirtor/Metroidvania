@@ -4,6 +4,8 @@ type t = {
     x : int;
     y : int;
     color : Tsdl.Sdl.color;
+    max_height : int;
+    max_width : int;
   };;
 
 let get_max bar =
@@ -22,6 +24,14 @@ let get_color bar =
   bar.color
 ;;
 
+let get_max_height bar =
+  bar.max_height
+;;
+
+let get_max_width bar =
+  bar.max_width
+;;
+
 exception TooMuchLife;;
 
 let life hero maximum =
@@ -37,8 +47,10 @@ let create hero cam maximum =
   let hero_life =  (life hero maximum) in
   let x' = (Camera.get_x cam) in
   let y' = (Camera.get_y cam) in
+  let h = Camera.get_h cam in
+  let w = Camera.get_w cam in
   let color' = (Tsdl.Sdl.Color.create 255 0 0 0) in
-  {max_life = maximum; life = hero_life; x = x'; y = y'; color = color'}
+  {max_life = maximum; life = hero_life; x = x'; y = y'; color = color'; max_height = (h/20); max_width = (w/4)}
 ;;
 
 let modify_life bar hero =
@@ -54,9 +66,4 @@ let modify_location bar cam =
 
 let modify_color bar new_color =
   {bar with color = new_color}
-;;
-
-let display bar =
-  ()
-(* Coming soon *)
 ;;
