@@ -1,9 +1,11 @@
 open Tsdl;;
+open Tsdl_image;;
 
 let sdl_initialize () =
   match Sdl.init Sdl.Init.video with
   |Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
-  |Ok () -> Printf.printf "video initialized\n";;
+  |Ok () -> Printf.printf "video initialized\n";
+     let r = Image.init Image.Init.png in ();;
 
 let create_window s w h f =
   (*match Sdl.create_window "metroidvania" 640 480 Sdl.Window.windowed with*)
@@ -41,6 +43,11 @@ let load_bmp s =
   |Error (`Msg e) -> Sdl.log "load_bmp error: %s" e; exit 1
   |Ok (s) -> s;;
 
+let load_png s =
+  match Image.load s with
+  |Error (`Msg e) -> Sdl.log "load_png error: %s" e; exit 1
+  |Ok (s) -> s;;
+
 let create_texture_from_surface r s =
   match Sdl.create_texture_from_surface r s with
   |Error (`Msg e) -> Sdl.log "create_texture_from_surface error: %s" e; exit 1
@@ -55,3 +62,7 @@ let render_clear r =
   match Sdl.render_clear r with
   |Error (`Msg e) -> Sdl.log "render_clear error: %s" e; exit 1
   |Ok () -> ();;
+
+let window = ref (create_window "metroidvania" 640 480 Sdl.Window.windowed);;
+
+let renderer = create_renderer !(window) (Sdl.Renderer.(accelerated + presentvsync));; (* create renderer *)
