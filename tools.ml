@@ -1,11 +1,23 @@
 open Tsdl;;
 open Tsdl_image;;
+open Tsdl_ttf;;
 
 let sdl_initialize () =
   match Sdl.init Sdl.Init.video with
   |Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
   |Ok () -> Printf.printf "video initialized\n";
-            let r = Image.init Image.Init.png in ();;
+    let r = Image.init Image.Init.png in ();;
+
+let font =
+  let t = Ttf.init () in
+  match Ttf.open_font "ttf/arial.ttf" 30 with
+    |Error (`Msg e) -> Sdl.log "open font error: %s" e; exit 1
+    |Ok (f) -> f;;
+
+let create_surface_from_font f s c =
+  match Ttf.render_text_solid f s c with
+    |Error (`Msg e) -> Sdl.log "create_surface_from_font error: %s" e; exit 1
+    |Ok (s) -> s;;
 
 let create_window s w h f =
   (*match Sdl.create_window "metroidvania" 640 480 Sdl.Window.windowed with*)
@@ -80,6 +92,11 @@ let set_render_draw_color rend r g b a =
   | Error (`Msg e) -> Sdl.log "set_render_draw_color error: %s" e; exit 1
   | Ok() -> ()
 ;;
+
+let close () =
+  Ttf.close_font font; 
+  Ttf.quit ();
+  Sdl.quit ();;
 
 let window = ref (create_window "metroidvania" 640 480 Sdl.Window.windowed);;
 

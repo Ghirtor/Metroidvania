@@ -1,9 +1,10 @@
 type movable = {
   id : int;
-  positionX : int;
-  positionY : int;
-  speedX : int;
-  speedY : int;
+  direction : int;
+  positionX : float;
+  positionY : float;
+  speedX : float;
+  speedY : float;
   width : int;
   height : int;
   mass : int;
@@ -12,7 +13,7 @@ type movable = {
   texture : Object_texture.t;
   sprite_left : Tsdl.Sdl.rect array;
   sprite_right : Tsdl.Sdl.rect array;
-  sprite_stopped : Tsdl.Sdl.rect;
+  sprite_stopped : Tsdl.Sdl.rect array;
   mutable frame : int;
   mutable timer : Tsdl.Sdl.uint32;
   zoom : int
@@ -20,10 +21,10 @@ type movable = {
 
 type fixed = {
   id : int;
-  positionX : int;
-  positionY : int;
-  speedX : int;
-  speedY : int;
+  positionX : float;
+  positionY : float;
+  speedX : float;
+  speedY : float;
   width : int;
   height : int;
   texture : Object_texture.t;
@@ -64,8 +65,8 @@ let null_collision = {col_type = Null; idA = -1; idB = -1; time = 9999.0; damage
 
 let get_hitbox t =
   match t with
-    Movable(x) -> {id = x.id; x = x.positionX; y = x.positionY; vx = x.speedX; vy = x.speedY; w = x.width; h = x.height; damages = 0}
-  |Fixed(x) -> {id = x.id; x = x.positionX; y = x.positionY; vx = x.speedX; vy = x.speedY; w = x.width; h = x.height; damages = 0};;
+    Movable(x) -> {id = x.id; x = int_of_float x.positionX; y = int_of_float x.positionY; vx = int_of_float x.speedX; vy = int_of_float x.speedY; w = x.width; h = x.height; damages = 0}
+  |Fixed(x) -> {id = x.id; x = int_of_float x.positionX; y = int_of_float x.positionY; vx = int_of_float x.speedX; vy = int_of_float x.speedY; w = x.width; h = x.height; damages = 0};;
 
 (* functions for types t, movable and fixed  *)
 
@@ -79,17 +80,38 @@ let movable_with_constructor m = Movable m;;
 
 let fixed_with_constructor f = Fixed f;;
 
-let move m f w h = let t = m.mass in {id = m.id; positionX = Pervasives.max (Pervasives.min (int_of_float ((float_of_int m.positionX) +. (f *. (float_of_int  m.speedX)))) (w - m.width)) 0; positionY = Pervasives.max (Pervasives.min (int_of_float ((float_of_int m.positionY) +. (f *. (float_of_int  m.speedY)))) (h - m.height)) 0; speedX = m.speedX; speedY = m.speedY; width = m.width; height = m.height; mass = t; life = m.life; max_life = m.max_life; texture = m.texture; sprite_left = m.sprite_left; sprite_right = m.sprite_right; sprite_stopped = m.sprite_stopped; frame = m.frame; timer = m.timer; zoom = m.zoom};;
+let move m f w h = let t = m.mass in {
+  id = m.id;
+  direction = if m.direction = 1 && m.speedX < 0.0 then -1 else if m.direction = -1 && m.speedX > 0.0 then 1 else m.direction;
+  positionX = Pervasives.max (Pervasives.min ((m.positionX) +. (f *. (m.speedX))) ((float_of_int w) -. (float_of_int m.width) +. 19.0)) (-19.0);
+  positionY = Pervasives.max (Pervasives.min ((m.positionY) +. (f *. (m.speedY))) ((float_of_int h) -. (float_of_int m.height))) 0.0;
+  speedX = m.speedX;
+  speedY = m.speedY;
+  width = m.width;
+  height = m.height;
+  mass = t;
+  life = m.life;
+  max_life = m.max_life;
+  texture = m.texture;
+  sprite_left = m.sprite_left;
+  sprite_right = m.sprite_right;
+  sprite_stopped = m.sprite_stopped;
+  frame = m.frame;
+  timer = m.timer;
+  zoom = m.zoom
+};;
 
-let right m = let l = m.life in {m with speedX = Settings.player_speed / Settings.frames_per_second};;
+let right m c = let l = m.life in {m with speedX = (float_of_int (Settings.player_speed / Settings.frames_per_second)) +. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_speed))};;
 
-let left m = let l = m.life in {m with speedX = -(Settings.player_speed / Settings.frames_per_second)};;
+let left m c = let l = m.life in {m with speedX = (float_of_int (-(Settings.player_speed / Settings.frames_per_second))) -. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_speed))};;
 
-let stop m = let l = m.life in {m with speedX = 0};;
+let stop m = let l = m.life in {m with speedX = 0.0};;
 
-let applyGravity m = m;;
+let applyGravity m c = let l = m.life in {m with speedY = m.speedY +. (float_of_int (Settings.player_gravity / Settings.frames_per_second)) +. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_gravity))};;
 
-let change_direction m = let t = m.mass in {id = m.id; positionX = (-1 * m.positionX); positionY = m.positionY; speedX = m.speedX; speedY = m.speedY; width = m.width; height = m.height; mass = t; life = m.life; max_life = m.max_life; texture = m.texture; sprite_left = m.sprite_left; sprite_right = m.sprite_right; sprite_stopped = m.sprite_stopped; frame = m.frame; timer = m.timer; zoom = m.zoom};;
+let apply_friction m c = let l = m.life in {m with speedY = if m.speedY >= (float_of_int (Settings.player_gravity / Settings.frames_per_second)) +. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_speed)) then m.speedY -. (float_of_int (Settings.player_gravity / Settings.frames_per_second)) -. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_speed)) else 0.0};;
+
+let change_direction m = let t = m.mass in {m with direction = -1 * m.direction};;
 
 let jump m = m;;
 
@@ -126,20 +148,20 @@ let get_damage m d = {m with life = (Pervasives.max (m.life - d) 0)};;
 
 let health m h = {m with life = (Pervasives.min (m.life + h) m.max_life)};;
 
-let create_movable x y vx vy m l ml p = {id = next_id (); positionX = x; positionY = y; speedX = vx; speedY = vy; width = (Sprite_clips.sprite_player_stopped_width) * Sprite_clips.sprite_player_zoom; height = (Sprite_clips.sprite_player_stopped_height) * Sprite_clips.sprite_player_zoom; mass = m; life = l; max_life = ml; texture = Object_texture.create p; sprite_left = Sprite_clips.sprite_clips_player_left; sprite_right = Sprite_clips.sprite_clips_player_right; sprite_stopped = Sprite_clips.sprite_player_stopped; frame = -1; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_player_zoom};;
+let create_movable x y vx vy m l ml p = {id = next_id (); direction = 1; positionX = x; positionY = y; speedX = vx; speedY = vy; width = (Sprite_clips.sprite_player_stopped_width) * Sprite_clips.sprite_player_zoom; height = (Sprite_clips.sprite_player_stopped_height) * Sprite_clips.sprite_player_zoom; mass = m; life = l; max_life = ml; texture = Object_texture.create p; sprite_left = Sprite_clips.sprite_clips_player_left; sprite_right = Sprite_clips.sprite_clips_player_right; sprite_stopped = Sprite_clips.sprite_clips_player_stopped; frame = -1; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_player_zoom};;
 
-let create_fixed x y w h p t = {id = next_id (); positionX = x; positionY = y; speedX = 0; speedY = 0; width = w; height = h; texture = Object_texture.create p; sprites = [|[||]; Sprite_clips.get t|]; frame = 0; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_laser_zoom; status = 1};;
+let create_fixed x y w h p t = {id = next_id (); positionX = x; positionY = y; speedX = 0.0; speedY = 0.0; width = w; height = h; texture = Object_texture.create p; sprites = [|[||]; Sprite_clips.get t|]; frame = 0; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_laser_zoom; status = 1};;
 
-let create_null_movable () = {id = -1; positionX = -1; positionY = -1; speedX = -1; speedY = -1; width = -1; height = -1; mass = -1; life = -1; max_life = -1; texture = Object_texture.create ""; sprite_left = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; sprite_right = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; sprite_stopped = Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1); frame = -1; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_player_zoom};;
+let create_null_movable () = {id = -1; direction = 1; positionX = -1.0; positionY = -1.0; speedX = -1.0; speedY = -1.0; width = -1; height = -1; mass = -1; life = -1; max_life = -1; texture = Object_texture.create ""; sprite_left = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; sprite_right = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; sprite_stopped = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; frame = -1; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_player_zoom};;
 
-let create_null_fixed () = {id = -1; positionX = -1; positionY = -1; speedX = -1; speedY = -1; width = -1; height = -1; texture = Object_texture.create ""; sprites = [|Sprite_clips.get Sprite_clips.laser|]; frame = 0; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_laser_zoom; status = 1};;
+let create_null_fixed () = {id = -1; positionX = -1.0; positionY = -1.0; speedX = -1.0; speedY = -1.0; width = -1; height = -1; texture = Object_texture.create ""; sprites = [|Sprite_clips.get Sprite_clips.laser|]; frame = 0; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_laser_zoom; status = 1};;
 
 let select_frame_movable vx vy f sl sr t =
   let frame = f + 1 in
-  if vx = 0 && vy = 0 then -1
+  if ((vx = 0.0 && vy = 0.0) || vy > 0.0) then -1
   else if (((Int32.to_int (Tsdl.Sdl.get_ticks ())) - (Int32.to_int t) > Settings.movable_delay_frame) || f = (-1)) then
     begin
-      if vx > 0 then
+      if vx > 0.0 then
 	begin
 	  if frame < (sl + sr) && frame >= sl then frame
 	  else if frame = (sl + sr) then sl
@@ -224,7 +246,10 @@ let get_frame t =
 let get_current_sprite t =
   match t with
     Movable(x) ->
-      if x.frame = -1 then x.sprite_stopped
+      if x.frame = -1 then begin
+	if x.direction = -1 then x.sprite_stopped.(0)
+	else x.sprite_stopped.(1)
+      end
       else if x.frame < (Array.length x.sprite_left) then x.sprite_left.(x.frame)
       else x.sprite_right.(x.frame - (Array.length x.sprite_left))
   |Fixed(x) -> x.sprites.(x.status).(x.frame);;

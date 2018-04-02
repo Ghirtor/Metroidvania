@@ -50,7 +50,7 @@ let create hero cam maximum =
   let h = Camera.get_h cam in
   let w = Camera.get_w cam in
   let color' = (Tsdl.Sdl.Color.create 255 0 0 0) in
-  {max_life = maximum; life = hero_life; x = x'; y = y'; color = color'; max_height = (h/20); max_width = (w/4)}
+  {max_life = maximum; life = hero_life; x = x'; y = y'; color = color'; max_height = (h/30); max_width = (w/4)}
 ;;
 
 let modify_life bar hero =

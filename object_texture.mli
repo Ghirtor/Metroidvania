@@ -1,9 +1,11 @@
 type t;;
 
-val create: string -> Tsdl.Sdl.renderer -> t;; 
+val create : string -> t;; 
 
-val get_path: t -> string;;
+val get_path : t -> string;;
 
-val get_texture: t -> Tsdl.Sdl.texture;;
+val set_texture : t -> Tsdl.Sdl.renderer -> unit;;
 
-val render: t -> int -> int -> Tsdl.Sdl.rect -> Tsdl.Sdl.renderer -> unit;;
+val get_texture : t -> Tsdl.Sdl.texture;;
+
+val render : t -> int -> int -> Tsdl.Sdl.rect -> Tsdl.Sdl.renderer -> int -> unit;;
