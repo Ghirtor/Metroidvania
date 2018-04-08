@@ -4,7 +4,7 @@ PROJECT=metroidvania.byte
 
 project:
 	make clean_project
-	ocamlbuild -use-ocamlfind -package tsdl,tsdl_mixer,tsdl_image,tsdl_ttf $(PROJECT)
+	ocamlbuild -use-ocamlfind -package tsdl,tsdl_mixer,tsdl_image,tsdl_ttf,lambdasoup $(PROJECT)
 
 test:
 	ocamlbuild $(TESTDIR)/test_object.byte

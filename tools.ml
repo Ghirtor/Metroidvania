@@ -2,6 +2,8 @@ open Tsdl;;
 open Tsdl_image;;
 open Tsdl_ttf;;
 
+let epsilon = 0.0001;;
+
 let sdl_initialize () =
   match Sdl.init Sdl.Init.video with
   |Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
@@ -97,7 +99,3 @@ let close () =
   Ttf.close_font font; 
   Ttf.quit ();
   Sdl.quit ();;
-
-let window = ref (create_window "metroidvania" 640 480 Sdl.Window.windowed);;
-
-let renderer = create_renderer !(window) (Sdl.Renderer.(accelerated + presentvsync));; (* create renderer *)

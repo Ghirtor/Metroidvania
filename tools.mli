@@ -1,3 +1,5 @@
+val epsilon : float;;
+
 val sdl_initialize : unit -> unit;;
 val create_window : string -> int -> int -> Tsdl.Sdl.Window.flags -> Tsdl.Sdl.window;;
 val get_window_surface : Tsdl.Sdl.window -> Tsdl.Sdl.surface;;

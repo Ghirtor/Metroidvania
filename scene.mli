@@ -7,17 +7,35 @@ val collection : Object.t array;;
 val width : int;;
 val height : int;;
  *)
-
-val players : Object.movable array;;
-val enemies : Object.movable array;;
-val elements : Object.fixed array;;
-val create_movables : int -> Object.movable array;;
-val create_fixed : int -> Object.fixed array;;
-val width : unit -> int;;
-val height : unit -> int;;
-val display : int -> int-> int -> int -> unit;; (* x -> y -> w -> h, x , y, w et h de la caméra *)
-val add_movable : Object.movable -> Object.movable array -> int ref -> unit ;;
-val add_fixed : Object.fixed -> Object.fixed array -> int ref -> unit;;
-val remove_movable : Object.movable -> Object.movable array -> int ref -> unit;;
-val remove_fixed : Object.fixed -> Object.fixed array -> int ref -> unit;;
-val play : unit -> unit;;
+type scene;;
+(* max heroes, max enemies, max elements, width, height, camera*)
+val create : Object.movable array -> Object.movable array -> Object.movable array -> Object.fixed array -> Object.fixed array -> Object.fixed array -> Object.fixed array -> Background.background array -> int -> int -> Camera.t -> scene;;
+(* Array of heroes * number of heroes in the array *)
+val get_characters :scene -> Object.movable array;;
+val nb_characters : scene -> int;;
+val get_enemies : scene -> Object.movable array;;
+val nb_enemies : scene -> int;;
+val get_monsters : scene -> Object.movable array;;
+val nb_monsters : scene -> int;;
+val get_decoration : scene -> Object.fixed array;;
+val nb_decoration : scene -> int;;
+val get_tiles : scene -> Object.fixed array;;
+val nb_tiles : scene -> int;;
+val get_traps : scene -> Object.fixed array;;
+val nb_traps : scene -> int;;
+val get_endlevels : scene -> Object.fixed array;;
+val get_backgrounds : scene -> Background.background array;;
+val get_width : scene -> int;;
+val get_height : scene -> int;;
+val get_camera : scene -> Camera.t;;
+val change_camera : Camera.t -> scene -> unit;;
+val remove_character : Object.movable -> scene -> unit;;
+val remove_enemy : Object.movable -> scene -> unit;;
+val remove_monster : Object.movable -> scene -> unit;;
+val remove_decoration : Object.fixed -> scene -> unit;;
+val remove_tile : Object.fixed -> scene -> unit;;
+val remove_trap : Object.fixed -> scene -> unit;;
+val set_textures : scene -> Tsdl.Sdl.renderer -> unit;;
+val get_backgrounds_in_areas : scene -> Tsdl.Sdl.rect -> Background.background array;;
+val get_tiles_in_areas : scene -> Tsdl.Sdl.rect -> Object.fixed array;;
+val update : scene -> Tsdl.Sdl.uint32 -> unit;;

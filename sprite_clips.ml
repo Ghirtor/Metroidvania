@@ -59,10 +59,54 @@ let sprite_laser_height = 53;;
 let sprite_laser_active1 = Sdl.Rect.create 0 11 sprite_laser_width sprite_laser_height;;
 let sprite_laser_active2 = Sdl.Rect.create 16 11 sprite_laser_width sprite_laser_height;;
 let sprite_clips_laser_active = [|sprite_laser_active1; sprite_laser_active2|];;
+let sprite_laser_inactive1 = Sdl.Rect.create 0 11 sprite_laser_width sprite_laser_height;;
+let sprite_laser_inactive2 = Sdl.Rect.create 16 11 sprite_laser_width sprite_laser_height;;
+let sprite_laser_inactive3 = Sdl.Rect.create 32 11 sprite_laser_width sprite_laser_height;;
+let sprite_laser_inactive4 = Sdl.Rect.create 48 11 sprite_laser_width sprite_laser_height;;
+let sprite_laser_inactive5 = Sdl.Rect.create 64 11 sprite_laser_width sprite_laser_height;;
+let sprite_laser_inactive6 = Sdl.Rect.create 80 11 sprite_laser_width sprite_laser_height;;
+let sprite_laser_inactive7 = Sdl.Rect.create 96 11 sprite_laser_width sprite_laser_height;;
+let sprite_clips_laser_inactive = [|sprite_laser_inactive1; sprite_laser_inactive2; sprite_laser_inactive3; sprite_laser_inactive4; sprite_laser_inactive5; sprite_laser_inactive6; sprite_laser_inactive7|];;
+
+let sprite_decoration_width = 14;;
+let sprite_decoration_height = 15;;
+let sprite_decoration_active1 = Sdl.Rect.create 1 1 sprite_decoration_width sprite_decoration_height;;
+let sprite_decoration_active2 = Sdl.Rect.create 17 1 sprite_decoration_width sprite_decoration_height;;
+let sprite_decoration_active3 = Sdl.Rect.create 33 1 sprite_decoration_width sprite_decoration_height;;
+let sprite_decoration_active4 = Sdl.Rect.create 49 1 sprite_decoration_width sprite_decoration_height;;
+let sprite_decoration_active5 = Sdl.Rect.create 65 1 sprite_decoration_width sprite_decoration_height;;
+let sprite_clips_decoration_active = [|sprite_decoration_active1; sprite_decoration_active2; sprite_decoration_active3; sprite_decoration_active4; sprite_decoration_active5|];;
+
+let sprite_endlevel_width = 16;;
+let sprite_endlevel_height = 16;;
+let sprite_endlevel_inactive = Sdl.Rect.create 0 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active1 = Sdl.Rect.create 0 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active2 = Sdl.Rect.create 16 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active3 = Sdl.Rect.create 32 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active4 = Sdl.Rect.create 48 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active5 = Sdl.Rect.create 64 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active6 = Sdl.Rect.create 80 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active7 = Sdl.Rect.create 96 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active8 = Sdl.Rect.create 112 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active9 = Sdl.Rect.create 128 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active10 = Sdl.Rect.create 144 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active11 = Sdl.Rect.create 160 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active12 = Sdl.Rect.create 176 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active13 = Sdl.Rect.create 192 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active14 = Sdl.Rect.create 208 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_active15 = Sdl.Rect.create 224 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_clips_endlevel_inactive = [|sprite_endlevel_inactive|];;
+let sprite_clips_endlevel_active = [|sprite_endlevel_active1; sprite_endlevel_active2; sprite_endlevel_active3; sprite_endlevel_active4; sprite_endlevel_active5; sprite_endlevel_active6; sprite_endlevel_active7; sprite_endlevel_active8; sprite_endlevel_active9; sprite_endlevel_active10; sprite_endlevel_active11; sprite_endlevel_active12; sprite_endlevel_active13; sprite_endlevel_active14; sprite_endlevel_active15|];;
 
 (* functions *)
 
 let laser = 0;;
+let endlevel = 1;;
+let decoration = 2;;
+let tile = 3;;
 
 let get t =
-  if t = laser then sprite_clips_laser_active else failwith "invalid type";;
+  if t = laser then [|sprite_clips_laser_inactive;sprite_clips_laser_active|]
+  else if t = endlevel then [|[|sprite_endlevel_inactive|];sprite_clips_endlevel_active|]
+  else if t = decoration then [|[||];sprite_clips_decoration_active|]
+  else [|[||];sprite_clips_laser_active|];;

@@ -1,0 +1,1 @@
+val parse : string -> bool -> (Object.movable array * Object.movable array * Object.movable array * Object.fixed array * Object.fixed array * Object.fixed array * Object.fixed array * Background.background array * int * int);;

@@ -16,11 +16,14 @@ type movable = {
   sprite_stopped : Tsdl.Sdl.rect array;
   mutable frame : int;
   mutable timer : Tsdl.Sdl.uint32;
-  zoom : int
+  zoom : int;
+  jump : float;
+  max_jump : float
 };;
 
 type fixed = {
   id : int;
+  subtype : string;
   positionX : float;
   positionY : float;
   speedX : float;
@@ -28,11 +31,14 @@ type fixed = {
   width : int;
   height : int;
   texture : Object_texture.t;
+  optionnal_texture : Object_texture.t;
   sprites : Tsdl.Sdl.rect array array;
   mutable frame : int;
   mutable timer : Tsdl.Sdl.uint32;
+  sourceX : int;
+  sourceY : int;
   zoom : int;
-  mutable status : int
+  mutable status : int;
 };;
 
 type collision_type = Null | Horizontal | Vertical;;
@@ -61,12 +67,24 @@ type t = Movable of movable | Fixed of fixed;;
 
 let null_collision = {col_type = Null; idA = -1; idB = -1; time = 9999.0; damagesA = -1; damagesB = -1};;
 
+let global_tile_texture = ref (Some(Object_texture.create ""));;
+
+let get_global_tile_texture () =
+  match (!global_tile_texture) with
+    None -> failwith "no texture"
+  |Some(x) -> x;;
+
 (* get the hitbox corresponding to the t object *)
 
 let get_hitbox t =
   match t with
     Movable(x) -> {id = x.id; x = int_of_float x.positionX; y = int_of_float x.positionY; vx = int_of_float x.speedX; vy = int_of_float x.speedY; w = x.width; h = x.height; damages = 0}
   |Fixed(x) -> {id = x.id; x = int_of_float x.positionX; y = int_of_float x.positionY; vx = int_of_float x.speedX; vy = int_of_float x.speedY; w = x.width; h = x.height; damages = 0};;
+
+let to_box t =
+  match t with
+    Movable(x) -> Tsdl.Sdl.Rect.create (int_of_float x.positionX) (int_of_float x.positionY) (x.width) (x.height)
+  |Fixed(x) -> Tsdl.Sdl.Rect.create (int_of_float x.positionX) (int_of_float x.positionY) (x.width * x.zoom) (x.height * x.zoom);;
 
 (* functions for types t, movable and fixed  *)
 
@@ -83,8 +101,8 @@ let fixed_with_constructor f = Fixed f;;
 let move m f w h = let t = m.mass in {
   id = m.id;
   direction = if m.direction = 1 && m.speedX < 0.0 then -1 else if m.direction = -1 && m.speedX > 0.0 then 1 else m.direction;
-  positionX = Pervasives.max (Pervasives.min ((m.positionX) +. (f *. (m.speedX))) ((float_of_int w) -. (float_of_int m.width) +. 19.0)) (-19.0);
-  positionY = Pervasives.max (Pervasives.min ((m.positionY) +. (f *. (m.speedY))) ((float_of_int h) -. (float_of_int m.height))) 0.0;
+  positionX = Pervasives.max (Pervasives.min ((m.positionX) +. (f *. (m.speedX))) ((float_of_int w) -. ((float_of_int m.width) *. (float_of_int m.zoom)))) (0.0);
+  positionY = Pervasives.max (Pervasives.min ((m.positionY) +. (f *. (m.speedY))) ((float_of_int h) -. ((float_of_int m.height) *. (float_of_int m.zoom)))) 0.0;
   speedX = m.speedX;
   speedY = m.speedY;
   width = m.width;
@@ -98,7 +116,9 @@ let move m f w h = let t = m.mass in {
   sprite_stopped = m.sprite_stopped;
   frame = m.frame;
   timer = m.timer;
-  zoom = m.zoom
+  zoom = m.zoom;
+  jump = m.jump;
+  max_jump = m.max_jump
 };;
 
 let right m c = let l = m.life in {m with speedX = (float_of_int (Settings.player_speed / Settings.frames_per_second)) +. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_speed))};;
@@ -109,11 +129,11 @@ let stop m = let l = m.life in {m with speedX = 0.0};;
 
 let applyGravity m c = let l = m.life in {m with speedY = m.speedY +. (float_of_int (Settings.player_gravity / Settings.frames_per_second)) +. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_gravity))};;
 
-let apply_friction m c = let l = m.life in {m with speedY = if m.speedY >= (float_of_int (Settings.player_gravity / Settings.frames_per_second)) +. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_speed)) then m.speedY -. (float_of_int (Settings.player_gravity / Settings.frames_per_second)) -. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_speed)) else 0.0};;
+let apply_friction m c = let l = m.life in {m with speedY = if m.speedY >= (float_of_int (Settings.player_gravity / Settings.frames_per_second)) +. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_gravity)) then max (m.speedY -. (float_of_int (Settings.player_gravity / Settings.frames_per_second)) -. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_gravity))) 0.0 else 0.0};;
 
 let change_direction m = let t = m.mass in {m with direction = -1 * m.direction};;
 
-let jump m = m;;
+let jump m c = {m with jump = if m.jump = m.max_jump then 0.0 else min (m.jump +. (float_of_int (Settings.player_jump / Settings.frames_per_second)) +. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_gravity))) (m.max_jump); max_jump = if m.jump = m.max_jump then 0.0 else m.max_jump; speedY = if m.jump = m.max_jump then 0.0 else (m.speedY -. (float_of_int (Settings.player_jump / Settings.frames_per_second)) -. (((Int32.to_float c) /. 1000.0) *. (float_of_int Settings.player_gravity)))};;
 
 (* we assume that point (x=0, y=0 is at top left corner *)
 (* checks if there is a collision between 2 hitboxes *)
@@ -148,17 +168,36 @@ let get_damage m d = {m with life = (Pervasives.max (m.life - d) 0)};;
 
 let health m h = {m with life = (Pervasives.min (m.life + h) m.max_life)};;
 
-let create_movable x y vx vy m l ml p = {id = next_id (); direction = 1; positionX = x; positionY = y; speedX = vx; speedY = vy; width = (Sprite_clips.sprite_player_stopped_width) * Sprite_clips.sprite_player_zoom; height = (Sprite_clips.sprite_player_stopped_height) * Sprite_clips.sprite_player_zoom; mass = m; life = l; max_life = ml; texture = Object_texture.create p; sprite_left = Sprite_clips.sprite_clips_player_left; sprite_right = Sprite_clips.sprite_clips_player_right; sprite_stopped = Sprite_clips.sprite_clips_player_stopped; frame = -1; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_player_zoom};;
+let create_movable x y vx vy m l ml p z w h = {id = next_id (); direction = 1; positionX = x; positionY = y; speedX = vx; speedY = vy; width = w; height = h; mass = m; life = l; max_life = ml; texture = Object_texture.create p; sprite_left = Sprite_clips.sprite_clips_player_left; sprite_right = Sprite_clips.sprite_clips_player_right; sprite_stopped = Sprite_clips.sprite_clips_player_stopped; frame = -1; timer = Tsdl.Sdl.get_ticks (); zoom = z; jump = 0.0; max_jump = 0.0};;
 
-let create_fixed x y w h p t = {id = next_id (); positionX = x; positionY = y; speedX = 0.0; speedY = 0.0; width = w; height = h; texture = Object_texture.create p; sprites = [|[||]; Sprite_clips.get t|]; frame = 0; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_laser_zoom; status = 1};;
+let create_fixed st x y w h p opt t sx sy z = {id = next_id (); subtype = st; positionX = x; positionY = y; speedX = 0.0; speedY = 0.0; sourceX = sx; sourceY = sy; width = w; height = h; texture = Object_texture.create p; optionnal_texture = Object_texture.create opt; sprites = if not (String.equal st "TILE") then (Sprite_clips.get t) else [|[||];[|Tsdl.Sdl.Rect.create sx sy w h|]|]; frame = 0; timer = Tsdl.Sdl.get_ticks (); zoom = z; status = 1};;
 
-let create_null_movable () = {id = -1; direction = 1; positionX = -1.0; positionY = -1.0; speedX = -1.0; speedY = -1.0; width = -1; height = -1; mass = -1; life = -1; max_life = -1; texture = Object_texture.create ""; sprite_left = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; sprite_right = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; sprite_stopped = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; frame = -1; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_player_zoom};;
+let create_laser x y w h p sx sy z = create_fixed "LASER" x y w h p (Settings.laser_inactive_sprite_dir) (Sprite_clips.laser) sx sy z;;
 
-let create_null_fixed () = {id = -1; positionX = -1.0; positionY = -1.0; speedX = -1.0; speedY = -1.0; width = -1; height = -1; texture = Object_texture.create ""; sprites = [|Sprite_clips.get Sprite_clips.laser|]; frame = 0; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_laser_zoom; status = 1};;
+let create_decoration x y w h p sx sy z = create_fixed "DECORATION" x y w h p p (Sprite_clips.decoration) sx sy z;;
+
+let create_endlevel x y w h p sx sy z = create_fixed "ENDLEVEL" x y w h p (Settings.endlevel_inactive_sprite_dir) (Sprite_clips.endlevel) sx sy z;;
+
+let create_tile x y w h p sx sy z = let e = get_global_tile_texture () in if (String.equal (Object_texture.get_path e) "") then global_tile_texture := Some(Object_texture.create p); create_fixed "TILE" x y w h p p (Sprite_clips.tile) sx sy z;;
+
+let store_textures_fixed f r =
+  if not (String.equal f.subtype "TILE") then begin
+    for i = 0 to ((Array.length f.sprites.(0)) - 1) do
+      Object_texture.store_in_collection f.optionnal_texture f.sprites.(0).(i) r f.zoom;
+    done;
+    for i = 0 to ((Array.length f.sprites.(1)) - 1) do
+      Object_texture.store_in_collection f.texture f.sprites.(1).(i) r f.zoom;
+    done;
+  end
+  else Object_texture.store_in_collection (get_global_tile_texture ()) f.sprites.(1).(0) r f.zoom;;
+
+let create_null_movable () = {id = -1; direction = 1; positionX = -1.0; positionY = -1.0; speedX = -1.0; speedY = -1.0; width = -1; height = -1; mass = -1; life = -1; max_life = -1; texture = Object_texture.create ""; sprite_left = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; sprite_right = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; sprite_stopped = [|Tsdl.Sdl.Rect.create (-1) (-1) (-1) (-1)|]; frame = -1; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_player_zoom; jump = -1.0; max_jump = -1.0};;
+
+let create_null_fixed () = {id = -1; subtype = ""; positionX = -1.0; positionY = -1.0; speedX = -1.0; speedY = -1.0; sourceX = -1; sourceY = -1; width = -1; height = -1; texture = Object_texture.create ""; optionnal_texture = Object_texture.create ""; sprites = Sprite_clips.get (Sprite_clips.tile); frame = 0; timer = Tsdl.Sdl.get_ticks (); zoom = Sprite_clips.sprite_laser_zoom; status = 1};;
 
 let select_frame_movable vx vy f sl sr t =
   let frame = f + 1 in
-  if ((vx = 0.0 && vy = 0.0) || vy > 0.0) then -1
+  if (vx < 0.0 +. Tools.epsilon && vx > 0.0 -. Tools.epsilon && vy < 0.0 +. Tools.epsilon && vy > 0.0 -. Tools.epsilon) then -1
   else if (((Int32.to_int (Tsdl.Sdl.get_ticks ())) - (Int32.to_int t) > Settings.movable_delay_frame) || f = (-1)) then
     begin
       if vx > 0.0 then
@@ -176,13 +215,19 @@ let select_frame_movable vx vy f sl sr t =
     end
   else f;;
 
-let select_frame_fixed f sa si t st =
+let get_delay_frame sub =
+  if sub = "LASER" then Settings.laser_delay_frame
+  else if sub = "DECORATION" then Settings.decoration_delay_frame
+  else if sub = "ENDLEVEL" then Settings.endlevel_delay_frame
+  else 0;;
+
+let select_frame_fixed f sa si t st sub =
   let frame = f + 1 in
-  if ((Int32.to_int (Tsdl.Sdl.get_ticks ())) - (Int32.to_int t) <= Settings.laser_delay_frame) then f
+  if ((Int32.to_int (Tsdl.Sdl.get_ticks ())) - (Int32.to_int t) <= (get_delay_frame sub)) then f
   else
     begin
       match st with
-	0 -> if frame < si then frame else 0
+	0 -> if frame < si then frame else if sub = "LASER" then sa - 1 else 0
       |_ -> if frame < sa then frame else 0
     end;;
 
@@ -192,6 +237,11 @@ let get_id t =
   match t with
     Movable(x) -> x.id
   |Fixed(x) -> x.id;;
+
+let get_subtype t =
+  match t with
+    Movable(x) -> "movable"
+  |Fixed(x) -> x.subtype;;
 
 let compare t1 t2 = (get_id t1) = (get_id t2);;
 
@@ -236,7 +286,11 @@ let get_life m = m.life;;
 let get_texture t =
   match t with
     Movable(x) -> x.texture
-  |Fixed(x) -> x.texture;;
+  |Fixed(x) -> if x.status = 1 then begin
+    if String.equal x.subtype "TILE" then (get_global_tile_texture ()) else x.texture end
+    else x.optionnal_texture;;
+
+let get_optionnal_texture f = f.optionnal_texture;;
 
 let get_frame t =
   match t with
