@@ -8,9 +8,16 @@ val width : int;;
 val height : int;;
  *)
 type scene;;
+
+val get_enemy_display : unit -> bool;;
+
+val win : int;;
+val continue : int;;
 (* max heroes, max enemies, max elements, width, height, camera*)
 val create : Object.movable array -> Object.movable array -> Object.movable array -> Object.fixed array -> Object.fixed array -> Object.fixed array -> Object.fixed array -> Background.background array -> int -> int -> Camera.t -> scene;;
 (* Array of heroes * number of heroes in the array *)
+val get_friendly_bullets : scene -> Bullet.bullet array;;
+val get_enemy_bullets : scene -> Bullet.bullet array;;
 val get_characters :scene -> Object.movable array;;
 val nb_characters : scene -> int;;
 val get_enemies : scene -> Object.movable array;;
@@ -38,4 +45,7 @@ val remove_trap : Object.fixed -> scene -> unit;;
 val set_textures : scene -> Tsdl.Sdl.renderer -> unit;;
 val get_backgrounds_in_areas : scene -> Tsdl.Sdl.rect -> Background.background array;;
 val get_tiles_in_areas : scene -> Tsdl.Sdl.rect -> Object.fixed array;;
-val update : scene -> Tsdl.Sdl.uint32 -> unit;;
+val update : scene -> bool -> string -> int;;
+val free : scene -> unit;;
+val add_friendly_bullet : scene -> Bullet.bullet -> bool -> bool -> unit;;
+val add_enemy_bullet : scene -> Bullet.bullet -> unit;;

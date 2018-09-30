@@ -4,7 +4,8 @@ PROJECT=metroidvania.byte
 
 project:
 	make clean_project
-	ocamlbuild -use-ocamlfind -package tsdl,tsdl_mixer,tsdl_image,tsdl_ttf,lambdasoup $(PROJECT)
+	ocamlbuild net.o
+	ocamlbuild -use-ocamlfind -package tsdl,tsdl_mixer,tsdl_image,tsdl_ttf,lambdasoup -lflags -custom,net.o $(PROJECT)
 
 test:
 	ocamlbuild $(TESTDIR)/test_object.byte
@@ -18,6 +19,7 @@ clean_testdir:
 	rm -f $(TESTS).opt
 
 clean_project:
+	rm -f *.o
 	rm -f *.byte
 	rm -rf _build
 	rm -f *.cm[iox] *~ .*~ #*#

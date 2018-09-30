@@ -79,7 +79,12 @@ let sprite_clips_decoration_active = [|sprite_decoration_active1; sprite_decorat
 
 let sprite_endlevel_width = 16;;
 let sprite_endlevel_height = 16;;
-let sprite_endlevel_inactive = Sdl.Rect.create 0 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_inactive1 = Sdl.Rect.create 0 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_inactive2 = Sdl.Rect.create 16 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_inactive3 = Sdl.Rect.create 32 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_inactive4 = Sdl.Rect.create 48 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_inactive5 = Sdl.Rect.create 64 0 sprite_endlevel_width sprite_endlevel_height;;
+let sprite_endlevel_inactive6 = Sdl.Rect.create 80 0 sprite_endlevel_width sprite_endlevel_height;;
 let sprite_endlevel_active1 = Sdl.Rect.create 0 0 sprite_endlevel_width sprite_endlevel_height;;
 let sprite_endlevel_active2 = Sdl.Rect.create 16 0 sprite_endlevel_width sprite_endlevel_height;;
 let sprite_endlevel_active3 = Sdl.Rect.create 32 0 sprite_endlevel_width sprite_endlevel_height;;
@@ -95,8 +100,13 @@ let sprite_endlevel_active12 = Sdl.Rect.create 176 0 sprite_endlevel_width sprit
 let sprite_endlevel_active13 = Sdl.Rect.create 192 0 sprite_endlevel_width sprite_endlevel_height;;
 let sprite_endlevel_active14 = Sdl.Rect.create 208 0 sprite_endlevel_width sprite_endlevel_height;;
 let sprite_endlevel_active15 = Sdl.Rect.create 224 0 sprite_endlevel_width sprite_endlevel_height;;
-let sprite_clips_endlevel_inactive = [|sprite_endlevel_inactive|];;
+let sprite_clips_endlevel_inactive = [|sprite_endlevel_inactive1; sprite_endlevel_inactive2; sprite_endlevel_inactive3; sprite_endlevel_inactive4; sprite_endlevel_inactive5; sprite_endlevel_inactive6|];;
 let sprite_clips_endlevel_active = [|sprite_endlevel_active1; sprite_endlevel_active2; sprite_endlevel_active3; sprite_endlevel_active4; sprite_endlevel_active5; sprite_endlevel_active6; sprite_endlevel_active7; sprite_endlevel_active8; sprite_endlevel_active9; sprite_endlevel_active10; sprite_endlevel_active11; sprite_endlevel_active12; sprite_endlevel_active13; sprite_endlevel_active14; sprite_endlevel_active15|];;
+
+let sprite_bullet_not_collided = Sdl.Rect.create 20 339 10 9;;
+let sprite_bullet_collided = Sdl.Rect.create 67 335 16 16;;
+let sprite_clips_bullet_not_collided = [|sprite_bullet_not_collided|];;
+let sprite_clips_bullet_collided = [|sprite_bullet_collided|];;
 
 (* functions *)
 
@@ -104,9 +114,11 @@ let laser = 0;;
 let endlevel = 1;;
 let decoration = 2;;
 let tile = 3;;
+let bullet = 4;;
 
 let get t =
   if t = laser then [|sprite_clips_laser_inactive;sprite_clips_laser_active|]
-  else if t = endlevel then [|[|sprite_endlevel_inactive|];sprite_clips_endlevel_active|]
+  else if t = endlevel then [|sprite_clips_endlevel_inactive;sprite_clips_endlevel_active|]
   else if t = decoration then [|[||];sprite_clips_decoration_active|]
+  else if t = bullet then [|sprite_clips_bullet_not_collided;sprite_clips_bullet_collided|]
   else [|[||];sprite_clips_laser_active|];;

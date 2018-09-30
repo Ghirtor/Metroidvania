@@ -95,7 +95,95 @@ let set_render_draw_color rend r g b a =
   | Ok() -> ()
 ;;
 
+let set_render_draw_blend_mode rend mode =
+  match Sdl.set_render_draw_blend_mode rend mode with
+  | Error (`Msg e) -> Sdl.log "set_render_draw_blend_mode: %s" e; exit 1
+  | Ok() -> ()
+;;
+
+let render_copy_ex src dst renderer texture angle point flip =
+  match Sdl.render_copy_ex ~src:src ~dst:dst renderer texture angle (Some(point)) flip with
+  | Error (`Msg e) -> Sdl.log "render_copy_ex: %s" e; exit 1
+  | Ok() -> ()
+;;
+
 let close () =
   Ttf.close_font font; 
   Ttf.quit ();
   Sdl.quit ();;
+
+let get_levels () =
+  let curr_dir = Sys.getcwd () in
+  let levels_dir = curr_dir^"/levels" in
+  Sys.readdir levels_dir;;
+
+let get_arenas () =
+  let curr_dir = Sys.getcwd () in
+  let levels_dir = curr_dir^"/arenas" in
+  Sys.readdir levels_dir;;
+
+let get_next_level s =
+  let tab_levels = get_levels () in
+  Array.sort String.compare tab_levels;
+  let next = ref (-1) in
+  let contains s1 s2 =
+    try
+      let len = String.length s2 in
+      for i = 0 to String.length s1 - len do
+	if String.sub s1 i len = s2 then raise Exit
+      done;
+      false
+    with Exit -> true in
+  try
+    for i = 0 to ((Array.length tab_levels) - 2) do
+      if contains tab_levels.(i) s then begin
+	next := i+1;
+	raise Exit;
+      end;
+    done;
+    (!next);
+  with
+  |Exit -> (!next);;
+
+let get_arena_rank s =
+  let tab_arenas = get_arenas () in
+  Array.sort String.compare tab_arenas;
+  let next = ref (-1) in
+  let contains s1 s2 =
+    try
+      let len = String.length s2 in
+      for i = 0 to String.length s1 - len do
+	if String.sub s1 i len = s2 then raise Exit
+      done;
+      false
+    with Exit -> true in
+  try
+    for i = 0 to ((Array.length tab_arenas) - 1) do
+      if contains tab_arenas.(i) s then begin
+	next := i;
+	raise Exit;
+      end;
+    done;
+    (!next);
+  with
+  |Exit -> (!next);;
+
+let create_texture_from_font r text color font =
+  let tmp = create_surface_from_font font text color in
+  let texture = create_texture_from_surface r tmp in
+  let () = Sdl.free_surface tmp in
+  texture
+;;
+
+let create_background s r =
+  let tmp = load_png s in
+  let res = create_texture_from_surface r tmp in
+  let () = Sdl.free_surface tmp in
+  res
+;;
+
+let free_arr arr =
+  for i=0 to (Array.length arr)-1 do
+    Sdl.destroy_texture arr.(i)
+  done
+;;

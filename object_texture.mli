@@ -17,3 +17,5 @@ val store_in_collection : t -> Tsdl.Sdl.rect -> Tsdl.Sdl.renderer -> int -> unit
 val render_from_collection : t -> int -> int -> Tsdl.Sdl.rect -> Tsdl.Sdl.renderer -> int -> unit;;
 
 val render : t -> int -> int -> Tsdl.Sdl.rect -> Tsdl.Sdl.renderer -> int -> unit;;
+
+val free : t -> unit;;

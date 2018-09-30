@@ -1,6 +1,6 @@
 type t;;
 
-val create : Object.movable -> Camera.t -> int -> t;;
+val create : Object.movable -> Camera.t -> Tsdl.Sdl.color -> t;;
 val modify_life : t -> Object.movable -> t;;
 val modify_location : t -> Camera.t -> t;;
 val modify_color : t -> Tsdl.Sdl.color -> t;;

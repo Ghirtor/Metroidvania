@@ -41,6 +41,8 @@ let get_id b = b.id;;
 
 let to_box b = Tsdl.Sdl.Rect.create b.x b.y (b.w * (!global_zoom)) (b.h * (!global_zoom));;
 
+let free () = Object_texture.free (get_global_texture ());;
+
 let get_x b = b.x;;
 let get_y b = b.y;;
 let get_w b = b.w;;

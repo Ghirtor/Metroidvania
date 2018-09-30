@@ -28,7 +28,6 @@ let nb_endlevels = ref 0;;
 let activate_multi b = multi := b;;
 
 let characterIter =
-  ind_characters := 0;
   let x = ref 0 in
   let y = ref 0 in
   let w = ref 0 in
@@ -43,8 +42,8 @@ let characterIter =
     else if !j = 5 then h := (int_of_string e)
     else if !j = 6 then zoom := (int_of_string e)
     else if !j = 7 then begin
+      j := -2;
       path := String.sub e 1 ((String.length e) - 1);
-      characters := (Array.make 1 (Object.create_null_movable ()));
       !characters.(!ind_characters) <- Object.create_movable (float_of_int (!x)) (float_of_int (!y)) 0.0 0.0 1 100 100 (!path) (!zoom) (!w) (!h);
       ind_characters := !ind_characters + 1;
     end;
@@ -97,7 +96,6 @@ let tileIter =
   fun span -> (trimmed_texts span |> List.iter f);;
 
 let backgroundIter =
-  ind_background := 0;
   let zoom = ref 0 in
   let w = ref 0 in
   let h = ref 0 in
@@ -115,7 +113,8 @@ let backgroundIter =
 	  ind_background := !ind_background + 1;
 	done;
       done;
-    end;
+    end
+    else if !j = 4 then j := -1;
     j := !j + 1;
   in
   fun span -> (trimmed_texts span |> List.iter f);;
@@ -124,7 +123,10 @@ let sceneIter =
   let j = ref 0 in
   let f = fun e ->
     if !j = 0 then scene_width := (int_of_string e)
-    else if !j = 1 then scene_height := (int_of_string e);
+    else if !j = 1 then begin
+      scene_height := (int_of_string e);
+      j := -1;
+    end;
     j := !j + 1;
   in
   fun span -> (trimmed_texts span |> List.iter f);;
@@ -145,6 +147,8 @@ let parse s m =
   ind_tiles := 0;
   ind_traps := 0;
   ind_endlevels := 0;
+  ind_background := 0;
+  ind_characters := 0;
   nb_decorations := 0;
   nb_tiles := 0;
   nb_traps := 0;
@@ -165,6 +169,7 @@ let parse s m =
 	in
 	trimmed_texts hd |> List.iter f) span;
     end) elements;
+  characters := (Array.make 1 (Object.create_null_movable ()));
   tiles := (Array.make (!nb_tiles) (Object.create_null_fixed ()));
   decorations := (Array.make (!nb_decorations) (Object.create_null_fixed ()));
   traps := (Array.make (!nb_traps) (Object.create_null_fixed ()));
@@ -178,4 +183,8 @@ let parse s m =
       div $$ "span" |> iter tileIter;
     end;
   );
+  if !multi then begin
+    enemies := (Array.make 1 (Object.create_null_movable ()));
+    !enemies.(0) <- Object.create_enemy (!characters.(0));
+  end;
   ((!characters),(!enemies),(!monsters),(!decorations),(Array.append (Array.append (Array.append (!tiles) (!endlevels)) (!traps)) (!decorations)),(!traps),(!endlevels),(!backgrounds),(!scene_width),(!scene_height));;

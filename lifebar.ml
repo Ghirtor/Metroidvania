@@ -43,14 +43,14 @@ let life hero maximum =
     maximum
 ;;
 
-let create hero cam maximum =
-  let hero_life =  (life hero maximum) in
-  let x' = (Camera.get_x cam) in
-  let y' = (Camera.get_y cam) in
+let create hero cam color =
+  let max_life = Object.get_max_life hero in
+  let hero_life =  (life hero max_life) in
+  let x = (Camera.get_x cam) in
+  let y = (Camera.get_y cam) in
   let h = Camera.get_h cam in
   let w = Camera.get_w cam in
-  let color' = (Tsdl.Sdl.Color.create 255 0 0 0) in
-  {max_life = maximum; life = hero_life; x = x'; y = y'; color = color'; max_height = (h/30); max_width = (w/4)}
+  {max_life; life = hero_life; x; y; color; max_height = (h/30); max_width = (w/4)}
 ;;
 
 let modify_life bar hero =
